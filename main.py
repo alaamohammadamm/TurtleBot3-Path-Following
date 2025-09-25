@@ -3,11 +3,13 @@ import time
 import sys
 import rclpy
 from movement import MoveTB3Command
+from camera import ImageAnalysis
 
 # Constants
 
 LINEAR_VEL = 0.1
 ANGULAR_VEL = 0.1
+K = 1/3
 
 # Initialize Camera
 
@@ -24,6 +26,10 @@ print("\nCamera opened successfully. Starting frame capture loop. Press Ctrl+C t
 start_time = time.time()
 frame_count = 0
 prev_frame = 0
+
+# Initialize Image Analysis
+
+Img_Analyzer = ImageAnalysis()
 
 # Initialize TurtleBot
 
@@ -49,10 +55,11 @@ while rclpy.ok():
 
     # Convert BGR (OpenCV default) to RGB if your model expects RGB
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    result = Img_Analyzer.follow_line(rgb_frame)
 
     # TEMPORARY CODE: IMAGE ANALYSIS CODE RETURNS A ANGULAR VELOCITY
 
-    angular_velocity = int(input("Give me a angular velocity."))  # Value that specifies angular speed.
+    angular_velocity = K * result * ANGULAR_VEL
 
     if angular_velocity < 0:
         Bot.get_logger().info("Turning Left")
